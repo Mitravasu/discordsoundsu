@@ -64,6 +64,13 @@ async def joinvc(ctx, channel: discord.VoiceChannel):
     await channel.connect()
 
 @client.command()
+async def leavevc(ctx):
+    if ctx.voice_client is not None:
+        await ctx.voice_client.disconnect()
+    else:
+        await ctx.send("I'm not connected to a voice channel.")
+
+@client.command()
 async def play(ctx: discord.ext.commands.Context):
     voice_client: discord.VoiceClient = ctx.voice_client
 
@@ -77,11 +84,7 @@ async def play(ctx: discord.ext.commands.Context):
     
     sound = sounds[0]  # For simplicity, just play the first sound
     
-    # source = discord.FFmpegPCMAudio('sounds/tarabipbip.mp3')
-    print(f'Sound url: {sound.url}, {sound.volume}')
-    
-    source = discord.FFmpegPCMAudio(sound.url)
-
+    source = discord.FFmpegPCMAudio('sounds/tarabipbip.mp3')
 
     if not source:
         return print(f"Could not load sound: {sound.name}")
@@ -95,5 +98,7 @@ async def play(ctx: discord.ext.commands.Context):
         voice_client.play(source, after=after_playing)
     else:
         print("Already playing a sound, cannot play another one right now.")
+
+
 
 client.run(os.getenv('DISCORD_TOKEN'))
