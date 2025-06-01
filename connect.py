@@ -1,4 +1,5 @@
 import os
+import re
 import discord
 from discord.ext import commands
 import discord.ext.commands
@@ -16,6 +17,16 @@ intents.guilds = True
 intents.message_content = True
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or("."), intents=intents)
+soundMap = [os.path.splitext(f)[0] for f in os.listdir('./mp3') if f.endswith('.mp3')]
+
+def extract_emoji_name(emoji_string):
+    # Match any text between colons in a Discord emoji format
+    pattern = r'<:([^:]+):\d+>'
+    match = re.search(pattern, emoji_string)
+    
+    if match:
+        return match.group(1)
+    return emoji_string
 
 @client.event
 async def on_ready():
@@ -25,19 +36,9 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-
-    if message.content.startswith('.hello'):
-        await message.channel.send('Hello!')
     
     if message.content.startswith('.'):
         await client.process_commands(message)
-
-async def on_guild_message(message):
-    if message.author.bot:
-        return
-
-    if message.content.startswith('.hello'):
-        await message.channel.send('Hello!')
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -70,30 +71,32 @@ async def leavevc(ctx):
         await ctx.send("I'm not connected to a voice channel.")
 
 @client.command()
-async def play(ctx: discord.ext.commands.Context):
+async def play(ctx: discord.ext.commands.Context, emoji: str = None):
+    if (emoji is None):
+        return ctx.send("Please provide an emoji to play a sound.")
+    
+    emoji_name = extract_emoji_name(emoji)
+    print(f"Emoji name extracted: {emoji_name}")
+
+    if (emoji_name not in soundMap):
+        return ctx.send(f"Sound for emoji '{emoji_name}' not found.")
+    
     voice_client: discord.VoiceClient = ctx.voice_client
 
     if voice_client is None:
         return print("I'm not connected to a voice channel.")
     
-    sounds = ctx.guild.soundboard_sounds
-
-    if not sounds:
-        return print("No sounds available to play.")
-    
-    sound = sounds[0]  # For simplicity, just play the first sound
-    
-    source = discord.FFmpegPCMAudio('sounds/tarabipbip.mp3')
+    source = discord.FFmpegPCMAudio(f'mp3/{emoji_name}.mp3')
 
     if not source:
-        return print(f"Could not load sound: {sound.name}")
+        return print(f"Could not load sound: {emoji_name}")
     
     if not voice_client.is_playing():
-        print(f'Playing sound: {sound.name}')
+        print(f'Playing sound: {emoji_name}')
         def after_playing(error):
             if error:
                 print(f'Error playing sound: {error}')
-            print(f'Finished playing sound: {sound.name}')
+            print(f'Finished playing sound: {emoji_name}')
         voice_client.play(source, after=after_playing)
     else:
         print("Already playing a sound, cannot play another one right now.")
