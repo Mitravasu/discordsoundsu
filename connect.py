@@ -17,7 +17,13 @@ intents.guilds = True
 intents.message_content = True
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or("."), intents=intents)
-soundMap = [os.path.splitext(f)[0] for f in os.listdir('./mp3') if f.endswith('.mp3')]
+soundMap = []
+
+def update_sound_map():
+    global soundMap
+    soundMap = [os.path.splitext(f)[0] for f in os.listdir('./mp3') if f.endswith('.mp3')]
+    print(f"Sound map updated: {soundMap}")
+
 
 def extract_emoji_name(emoji_string):
     # Match any text between colons in a Discord emoji format
@@ -31,26 +37,61 @@ def extract_emoji_name(emoji_string):
 @client.event
 async def on_ready():
     print('Bot is ready!')
+    update_sound_map()
+    for guild in client.guilds:
+        if guild.name == 'Bestest Study Group':
+            for vc in guild.voice_channels:
+                if vc.name == 'games' and len(vc.members) > 0:
+                    print(f'Joining voice channel: {vc.name}')
+                    await vc.connect()
+                    break
+
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
     
-    if message.content.startswith('.'):
-        await client.process_commands(message)
+    command_word = message.content.split()[0].lower()
+    
+    if command_word == 'join':
+        message.content = '.joinvc games'
+        return await client.process_commands(message)
+    elif command_word == 'leave':
+        message.content = '.leavevc'
+        return await client.process_commands(message)
+    elif extract_emoji_name(command_word) in soundMap:
+        message.content = f'.play {command_word}'
+        return await client.process_commands(message)
+    elif command_word == 'ls':
+        message.content = '.ls'
+        update_sound_map()
+        return await client.process_commands(message)
+    elif command_word.startswith('.'):
+        if command_word == '.ls':
+            update_sound_map()
+        return await client.process_commands(message)
+
 
 @client.event
-async def on_voice_state_update(member, before, after):
+async def on_voice_state_update(member: discord.Member, before, after):
     if member.bot:
         return
 
     if before.channel is None and after.channel is not None:
         print(f'{member.name} joined {after.channel.name}')
+        if member.name == '.mx2' or member.name == '.l3noire' and len(client.voice_clients) == 0:
+            await after.channel.connect();
     elif before.channel is not None and after.channel is None:
         print(f'{member.name} left {before.channel.name}')
+        if len(before.channel.members) == 1:
+            print(f'No members left in {before.channel.name}, disconnecting.')
+            await client.voice_clients[0].disconnect()
     elif before.channel != after.channel:
         print(f'{member.name} moved from {before.channel.name} to {after.channel.name}')
+        if (len(client.voice_clients) > 0):
+            await client.voice_clients[0].disconnect()
+        await after.channel.connect();
 
 @client.command()
 async def ping(ctx):
@@ -69,6 +110,14 @@ async def leavevc(ctx):
         await ctx.voice_client.disconnect()
     else:
         await ctx.send("I'm not connected to a voice channel.")
+
+@client.command()
+async def ls(ctx):
+    if not soundMap:
+        return await ctx.send("No sounds available.")
+    
+    sound_list = '\n'.join(soundMap)
+    await ctx.send(f"Available sounds:\n```\n{sound_list}\n```")
 
 @client.command()
 async def play(ctx: discord.ext.commands.Context, emoji: str = None):
