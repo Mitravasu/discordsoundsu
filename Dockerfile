@@ -10,13 +10,17 @@ WORKDIR /
 # Install system dependencies and FFmpeg
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
     ffmpeg \
     libmagic-dev \
     libopus0 \
     libffi-dev \
     libnacl-dev \
+    libssl-dev \
     gcc && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Copy the requirements file into the container
 COPY requirements.txt .

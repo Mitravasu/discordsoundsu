@@ -34,6 +34,27 @@ def extract_emoji_name(emoji_string):
         return match.group(1)
     return emoji_string
 
+async def play_audio(file_name, voice_client):
+    if not voice_client.is_connected():
+        print("Not connected to a voice channel.")
+        return
+    
+    source = discord.FFmpegPCMAudio(f'mp3/{file_name}.mp3')
+    
+    if not source:
+        print(f"Could not load sound: {file_name}")
+        return
+    
+    if not voice_client.is_playing():
+        print(f'Playing sound: {file_name}')
+        def after_playing(error):
+            if error:
+                print(f'Error playing sound: {error}')
+            print(f'Finished playing sound: {file_name}')
+        voice_client.play(source, after=after_playing)
+    else:
+        print("Already playing a sound, cannot play another one right now.")
+
 @client.event
 async def on_ready():
     print('Bot is ready!')
@@ -74,7 +95,7 @@ async def on_message(message):
 
 
 @client.event
-async def on_voice_state_update(member: discord.Member, before, after):
+async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
     if member.bot:
         return
 
@@ -82,6 +103,8 @@ async def on_voice_state_update(member: discord.Member, before, after):
         print(f'{member.name} joined {after.channel.name}')
         if member.name == '.mx2' or member.name == '.l3noire' and len(client.voice_clients) == 0:
             await after.channel.connect();
+        # play welcome sound everytime a user joins a voice channel
+        await play_audio('welcome', after.channel.guild.voice_client)
     elif before.channel is not None and after.channel is None:
         print(f'{member.name} left {before.channel.name}')
         if len(before.channel.members) == 1:
@@ -92,6 +115,8 @@ async def on_voice_state_update(member: discord.Member, before, after):
         if (len(client.voice_clients) > 0):
             await client.voice_clients[0].disconnect()
         await after.channel.connect();
+        # play welcome sound everytime a user joins a voice channel
+        await play_audio('welcome', after.channel.guild.voice_client)
 
 @client.command()
 async def ping(ctx):
@@ -132,23 +157,7 @@ async def play(ctx: discord.ext.commands.Context, emoji: str = None):
     
     voice_client: discord.VoiceClient = ctx.voice_client
 
-    if voice_client is None:
-        return print("I'm not connected to a voice channel.")
-    
-    source = discord.FFmpegPCMAudio(f'mp3/{emoji_name}.mp3')
-
-    if not source:
-        return print(f"Could not load sound: {emoji_name}")
-    
-    if not voice_client.is_playing():
-        print(f'Playing sound: {emoji_name}')
-        def after_playing(error):
-            if error:
-                print(f'Error playing sound: {error}')
-            print(f'Finished playing sound: {emoji_name}')
-        voice_client.play(source, after=after_playing)
-    else:
-        print("Already playing a sound, cannot play another one right now.")
+    await play_audio(emoji_name, voice_client)
 
 
 
