@@ -92,7 +92,29 @@ async def on_message(message):
         if command_word == '.ls':
             update_sound_map()
         return await client.process_commands(message)
+    elif command_word == 'upload':
+        message.content = '.upload'
+        return await client.process_commands(message)
 
+@client.command()
+async def upload(ctx: discord.ext.commands.Context):
+    if not ctx.message.attachments:
+        return await ctx.send("Please upload a sound file.")
+    
+    attachment = ctx.message.attachments[0]
+    
+    if not attachment.filename.endswith('.mp3'):
+        return await ctx.send("Please upload a valid .mp3 file.")
+
+    if attachment.content_type != "audio/mpeg":
+        await ctx.send(f"Skipping {attachment.filename}: not an MP3 audio file.")
+
+    file_name = attachment.filename
+    file_path = os.path.join('mp3', file_name)
+    await attachment.save(fp=file_path)
+
+    update_sound_map()
+    await ctx.send(f'Sound {file_name} uploaded successfully!')
 
 @client.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
@@ -110,13 +132,6 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         if len(before.channel.members) == 1:
             print(f'No members left in {before.channel.name}, disconnecting.')
             await client.voice_clients[0].disconnect()
-    elif before.channel != after.channel:
-        print(f'{member.name} moved from {before.channel.name} to {after.channel.name}')
-        if (len(client.voice_clients) > 0):
-            await client.voice_clients[0].disconnect()
-        await after.channel.connect();
-        # play welcome sound everytime a user joins a voice channel
-        await play_audio('welcome', after.channel.guild.voice_client)
 
 @client.command()
 async def ping(ctx):
