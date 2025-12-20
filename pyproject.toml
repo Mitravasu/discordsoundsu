@@ -1,0 +1,22 @@
+[project]
+name = "discordsoundsu"
+version = "0.1.0"
+description = "A Discord Bot to play sounds!"
+readme = "README.md"
+authors = [
+    { name = "Mitravasu Prakash" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "discord-py>=2.6.4",
+    "pynacl>=1.6.1",
+    "python-dotenv>=1.2.1",
+    "tzdata>=2025.3",
+]
+
+[project.scripts]
+discordsoundsu = "discordsoundsu.main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
