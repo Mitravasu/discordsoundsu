@@ -46,6 +46,24 @@ Run the bot with:
 uv run discordsoundsu
 ```
 
+### Using Docker
+
+Build the Docker image:
+
+```bash
+docker build -t discordsoundsu .
+```
+
+Run the container with volume mount for mp3 files:
+
+```bash
+docker run -v $(pwd)/mp3:/app/mp3 discordsoundsu
+```
+
+> **Note for Windows users:** 
+> - In PowerShell, use `${PWD}` instead of `$(pwd)`
+> - In Git Bash, prefix with `MSYS_NO_PATHCONV=1`
+
 ## 📁 Project Structure
 
 ```
