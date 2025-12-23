@@ -23,8 +23,6 @@ logger = logging.getLogger(__name__)
 
 class SleepCommands(Cog):
     def __init__(self, bot: Bot, sounds_manager: SoundsManager):
-        self.WAIT_TIME = 30
-
         self.bot = bot
         self.sleep_mode = False
         self.sleep_time = time(0, 0, tzinfo=ZoneInfo("America/New_York"))
@@ -64,7 +62,8 @@ class SleepCommands(Cog):
                 logger.error(f"Error playing sound {self.sleep_sound}")
             else:
                 # Play the sleep sound for WAIT_TIME seconds
-                await asyncio.sleep(self.WAIT_TIME)
+                wait_time = self.sounds_manager.get_sound_duration(self.sleep_sound)
+                await asyncio.sleep(wait_time)
 
             await kick_all_from_vc(self.bot.guilds)
             logger.info("Kicked all users from voice channels for sleep mode.")
@@ -73,7 +72,7 @@ class SleepCommands(Cog):
 
     @app_commands.command(name="toggle_sleep", description="Toggles the sleep mode")
     @app_commands.describe(sleep="Enable or disable sleep mode")
-    async def join(self, interaction: Interaction, sleep: bool):
+    async def toggle_sleep(self, interaction: Interaction, sleep: bool):
         self.sleep_mode = sleep
 
         if sleep:

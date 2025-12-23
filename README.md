@@ -68,6 +68,14 @@ Run this comand to clear UV cache and do a fresh install
 rm -rf .venv __pycache__ && rm -rf ~/.cache/uv && pip cache purge
 ```
 
+## Linting
+```bash
+uv run ruff check
+```
+
+```bash
+uv run ruff format
+```
 
 ## 📁 Project Structure
 

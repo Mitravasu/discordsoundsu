@@ -1,6 +1,10 @@
 import os
 from .utils import MP3_PATH
 from discord import app_commands
+from mutagen.mp3 import MP3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SoundsManager:
@@ -21,3 +25,10 @@ class SoundsManager:
             for option in self._sounds
             if current.lower() in option.lower()
         ][:limit]
+
+    def get_sound_duration(self, sound: str):
+        if sound not in self._sounds:
+            logger.info(f"Sound {sound} does not exist")
+            return 0
+        audio = MP3(str(MP3_PATH / f"{sound}.mp3"))
+        return audio.info.length
