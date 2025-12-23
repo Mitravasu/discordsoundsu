@@ -11,7 +11,7 @@ import asyncio
 from discord.ext import tasks
 from discord.ext.commands import Bot, Cog
 from datetime import time
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, available_timezones
 from discord import Interaction, app_commands
 
 from ..utils import kick_all_from_vc, play_audio
@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 class SleepCommands(Cog):
     def __init__(self, bot: Bot, sounds_manager: SoundsManager):
         self.bot = bot
-        self.sleep_time = time(0, 0, tzinfo=ZoneInfo("America/New_York"))
+        self.timezone = ZoneInfo("America/New_York")
+        self.sleep_time = time(0, 0, tzinfo=self.timezone)
         self.sleep_sound = "sleep"
         self.sounds_manager = sounds_manager
 
@@ -100,7 +101,7 @@ class SleepCommands(Cog):
         minute: app_commands.Range[int, 0, 59],
     ):
         logger.info(f"Setting sleep time to {hour:02}:{minute:02}")
-        self.sleep_time = time(hour, minute, tzinfo=ZoneInfo("America/New_York"))
+        self.sleep_time = time(hour, minute, tzinfo=self.timezone)
         logger.info(f"Updated sleep time to {self.sleep_time}")
         self.sleep_task.change_interval(time=self.sleep_time)
 
@@ -119,10 +120,10 @@ class SleepCommands(Cog):
         formatted_time = self.sleep_time.strftime("%H:%M")
 
         await interaction.response.send_message(
-            f"Sleep mode: [{self.sleep_task.is_running()}] | Time: {formatted_time} | Sleep Sound: {self.sleep_sound}"
+            f"Sleep mode: [{self.sleep_task.is_running()}] | Time: {formatted_time} {self.timezone} | Sleep Sound: {self.sleep_sound}"
         )
 
-    @app_commands.command(name="set_sleep_sound", description="set the sleep sound")
+    @app_commands.command(name="set_sleep_sound", description="Set the sleep sound")
     async def set_sleep_sound(self, interaction: Interaction, sound_name: str):
         if sound_name is None:
             return await interaction.response.send_message.send(
@@ -137,6 +138,52 @@ class SleepCommands(Cog):
         self.sleep_sound = sound_name
 
         await interaction.response.send_message(f"Sleep sound set as: {sound_name}")
+
+    @app_commands.command(name="set_sleep_timezone", description="Set the sleep timezone")
+    @app_commands.describe(
+        timezone="The timezone to set for sleep scheduling (e.g., 'America/New_York')"
+    )
+    async def set_sleep_timezone(self, interaction: Interaction, timezone: str):
+        try:
+            self.timezone = ZoneInfo(timezone)
+            # Update sleep_time with new timezone
+            self.sleep_time = self.sleep_time.replace(tzinfo=self.timezone)
+            # Update the task interval
+            self.sleep_task.change_interval(time=self.sleep_time)
+
+            # Restart the task if it's running to apply changes
+            if self.sleep_task.is_running():
+                self.sleep_task.restart()
+
+            await interaction.response.send_message(
+                f"Sleep timezone set to: {timezone}"
+            )
+        except Exception as error:
+            logger.error(f"Error setting timezone: {error}")
+            await interaction.response.send_message(
+                f"Error setting timezone: {error}"
+            )
+
+    @set_sleep_timezone.autocomplete("timezone")
+    async def sleep_timezone_autocomplete(
+        self, interaction: Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        """
+        Autocomplete handler for timezones. Returns the top 25 timezones that match the current input.
+
+        :param self: The instance of the class
+        :param interaction: The Discord Interaction
+        :type interaction: Interaction
+        :param current: The current input from the user
+        :type current: str
+        :return: A list of autocomplete choices
+        :rtype: List[Choice[str]]
+        """
+        return [
+            app_commands.Choice(name=tz, value=tz)
+            for tz in sorted(available_timezones())
+            if current.lower() in tz.lower()
+        ][:25]
 
     @set_sleep_sound.autocomplete("sound_name")
     async def sound_name_autocomplete(
