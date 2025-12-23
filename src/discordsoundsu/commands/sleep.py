@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 class SleepCommands(Cog):
     def __init__(self, bot: Bot, sounds_manager: SoundsManager):
         self.bot = bot
-        self.sleep_mode = False
         self.sleep_time = time(0, 0, tzinfo=ZoneInfo("America/New_York"))
         self.sleep_sound = "sleep"
         self.sounds_manager = sounds_manager
@@ -73,19 +72,16 @@ class SleepCommands(Cog):
     @app_commands.command(name="toggle_sleep", description="Toggles the sleep mode")
     @app_commands.describe(sleep="Enable or disable sleep mode")
     async def toggle_sleep(self, interaction: Interaction, sleep: bool):
-        self.sleep_mode = sleep
-
-        if sleep:
-            if self.sleep_task.is_running():
-                logger.error("Sleep task is already running")
-                await interaction.response.send_message("Sleep task is already ENABLED")
-                return
-
+        if sleep and not self.sleep_task.is_running():
+            logger.info("Enabling Sleep Task")
             self.sleep_task.start()
+        elif not sleep and self.sleep_task.is_running():
+            logger.info("Disabling Sleep Task")
+            self.sleep_task.cancel()
         else:
-            self.sleep_task.stop()
+            logger.info("Sleep Task already in desired state, no action taken")
 
-        sleep_status = "ENABLED" if sleep else "DISABLED"
+        sleep_status = "ENABLED" if self.sleep_task.is_running() else "DISABLED"
         formatted_time = self.sleep_time.strftime("%H:%M")
 
         await interaction.response.send_message(
@@ -109,11 +105,9 @@ class SleepCommands(Cog):
         self.sleep_task.change_interval(time=self.sleep_time)
 
         if not self.sleep_task.is_running():
-            logger.info("Enabling Sleep Task")
-            self.sleep_mode = True
             self.sleep_task.start()
         else:
-            logger.info("Sleep task already running, updated time only")
+            self.sleep_task.restart()
 
         await interaction.response.send_message(
             f"Sleep time set to {hour:02}:{minute:02} daily."
@@ -125,7 +119,7 @@ class SleepCommands(Cog):
         formatted_time = self.sleep_time.strftime("%H:%M")
 
         await interaction.response.send_message(
-            f"Sleep mode: [{self.sleep_mode}] | Time: {formatted_time} | Sleep Sound: {self.sleep_sound}"
+            f"Sleep mode: [{self.sleep_task.is_running()}] | Time: {formatted_time} | Sleep Sound: {self.sleep_sound}"
         )
 
     @app_commands.command(name="set_sleep_sound", description="set the sleep sound")
