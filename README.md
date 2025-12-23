@@ -12,7 +12,8 @@ channels.
 -   **Sound Playback** - Play custom sounds in voice channels with simple
     commands and auto completion
 -   **Sound Management** - Upload and organize your own sound files
--   **Sleep Timers** - Automatically kick all members from the call when its time to sleep 😴
+-   **Sleep Timers** - Automatically kick all members from the call when its
+    time to sleep 😴
 -   **Easy Setup** - Quick installation and configuration
 
 ## 📋 Prerequisites
@@ -69,6 +70,7 @@ rm -rf .venv __pycache__ && rm -rf ~/.cache/uv && pip cache purge
 ```
 
 ## Linting
+
 ```bash
 uv run ruff check
 ```
@@ -78,12 +80,14 @@ uv run ruff format
 ```
 
 ## Run on startup
+
 1. Add your project directory to `run_discordsoundsu.sh`
 1. `chmod +x run_discordsoundsu.sh`
 1. `crontab -e`
 1. Add the following line and save
 
     `@reboot /full/path/to/run_discordsoundsu.sh`
+
 1. Reboot and discordsoundsu should run on startup
 
 ## 🤝 Contributing
@@ -94,8 +98,10 @@ issues page.
 ## 📬 Contact
 
 [![@Mitravasu](https://img.shields.io/badge/GitHub-Mitravasu-green?logo=github&style=flat)](https://github.com/Mitravasu)
-
 [![Website](https://img.shields.io/badge/Website-mitravasu.com-orange?logo=googlechrome&logoColor=white&style=flat)](https://mitravasu.com)
+
+[![@l3n0ire](https://img.shields.io/badge/GitHub-l3n0ire-green?logo=github&style=flat)](https://github.com/l3n0ire)
+[![Website](https://img.shields.io/badge/Website-colinlin.vercel.app-orange?logo=googlechrome&logoColor=white&style=flat)](https://colinlin.vercel.app/)
 
 ## 📝 License
 
