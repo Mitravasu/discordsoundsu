@@ -5,6 +5,7 @@ Commands related to voice channel operations.
 - Leave VC
 - Kick all from VC
 """
+
 from discord.ext.commands import Bot, Cog
 from discord import VoiceChannel, Interaction, app_commands
 
@@ -29,4 +30,6 @@ class VoiceCommands(Cog):
             await interaction.guild.voice_client.disconnect()
             await interaction.response.send_message("Disconnected from voice channel")
         else:
-            await interaction.response.send_message("I'm not connected to a voice channel.")
+            await interaction.response.send_message(
+                "I'm not connected to a voice channel."
+            )

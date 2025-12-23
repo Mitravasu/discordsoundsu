@@ -6,6 +6,7 @@ Commands related to owner-only functionalities.
 
 from discord.ext.commands import Bot, Cog, command, is_owner, Context
 
+
 class OwnerCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
