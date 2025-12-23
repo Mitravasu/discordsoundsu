@@ -77,16 +77,14 @@ uv run ruff check
 uv run ruff format
 ```
 
-## 📁 Project Structure
+## Run on startup
+1. Add your project directory to `run_discordsoundsu.sh`
+1. `chmod +x run_discordsoundsu.sh`
+1. `crontab -e`
+1. Add the following line and save
 
-```
-discordsoundsu/
-├── src/discordsoundsu/    # Main bot source code
-│   ├── commands/          # Command modules
-│   └── ...
-├── mp3/                   # Sound files directory
-└── pyproject.toml         # Project configuration
-```
+    `@reboot /full/path/to/run_discordsoundsu.sh`
+1. Reboot and discordsoundsu should run on startup
 
 ## 🤝 Contributing
 
