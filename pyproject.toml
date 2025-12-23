@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Mitravasu Prakash" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "discord-py>=2.6.4",
     "pynacl>=1.6.1",

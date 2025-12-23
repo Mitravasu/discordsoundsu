@@ -17,7 +17,7 @@ channels.
 
 ## 📋 Prerequisites
 
--   Python 3.8 or higher
+-   Python 3.11 only
 -   [uv](https://github.com/astral-sh/uv) package manager
 -   A Discord bot token
 
@@ -60,9 +60,14 @@ Run the container with volume mount for mp3 files:
 docker run -v $(pwd)/mp3:/app/mp3 discordsoundsu
 ```
 
-> **Note for Windows users:** 
-> - In PowerShell, use `${PWD}` instead of `$(pwd)`
-> - In Git Bash, prefix with `MSYS_NO_PATHCONV=1`
+### Clean up UV cache
+
+Run this comand to clear UV cache and do a fresh install
+
+```bash
+rm -rf .venv __pycache__ && rm -rf ~/.cache/uv && pip cache purge
+```
+
 
 ## 📁 Project Structure
 

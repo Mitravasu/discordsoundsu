@@ -71,8 +71,11 @@ class SleepCommands(Cog):
             self.sleep_task.start()
         else:
             self.sleep_task.stop()
+
+        sleep_status = "ENABLED" if sleep else "DISABLED"
+        formatted_time = self.sleep_time.strftime('%H:%M')
                     
-        await interaction.response.send_message(f"Sleep mode: [{"ENABLED" if sleep else "DISABLED"}] | Time: {self.sleep_time.strftime('%H:%M')}")
+        await interaction.response.send_message(f"Sleep mode: [{sleep_status}] | Time: {formatted_time}")
 
 
     @app_commands.command(name="set_sleep", description="Set a daily sleep time.")
