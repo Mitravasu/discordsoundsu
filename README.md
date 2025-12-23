@@ -10,9 +10,9 @@ channels.
 ## 🎵 Features
 
 -   **Sound Playback** - Play custom sounds in voice channels with simple
-    commands
+    commands and auto completion
 -   **Sound Management** - Upload and organize your own sound files
--   **Sleep Timers** - Automatically disconnect after a specified duration
+-   **Sleep Timers** - Automatically kick all members from the call when its time to sleep 😴
 -   **Easy Setup** - Quick installation and configuration
 
 ## 📋 Prerequisites

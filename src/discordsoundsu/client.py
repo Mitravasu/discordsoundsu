@@ -11,6 +11,7 @@ from .commands.sounds import SoundCommands
 from .commands.sleep import SleepCommands
 
 from .utils import play_audio
+from .sounds_manager import SoundsManager
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ class DiscordSoundsUClient:
         self.bot.add_listener(self.on_ready)
         self.bot.add_listener(self.on_voice_state_update)
 
+        self.sounds_manager = SoundsManager()
+
     async def initialize(self):
         logger.info("Initializing DiscordSoundsU Client...")
         await self._register_cogs()
@@ -40,8 +43,8 @@ class DiscordSoundsUClient:
         logger.info("Registering Cogs...")
         await self.bot.add_cog(VoiceCommands(self.bot))
         await self.bot.add_cog(OwnerCommands(self.bot))
-        await self.bot.add_cog(SoundCommands(self.bot))
-        await self.bot.add_cog(SleepCommands(self.bot))
+        await self.bot.add_cog(SoundCommands(self.bot, self.sounds_manager))
+        await self.bot.add_cog(SleepCommands(self.bot, self.sounds_manager))
         logger.info("Cogs registered!")
     
     # Event Handlers

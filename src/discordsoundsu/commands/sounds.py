@@ -13,34 +13,35 @@ from typing import List
 from discord.ext.commands import Bot, Cog
 from discord import Interaction, app_commands, VoiceClient, Attachment
 
-from ..utils import MP3_PATH, fetch_sounds, play_audio
+from ..utils import MP3_PATH, play_audio
+from ..sounds_manager import SoundsManager
 
 logger = logging.getLogger(__name__)
 
 class SoundCommands(Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot, sounds_manager: SoundsManager):
         self.bot = bot
-        self.sound_map = fetch_sounds()
+        self.sounds_manager = sounds_manager
 
     @app_commands.command(name="ls", description="Lists available sounds")
     async def ls(self, interaction: Interaction):
-        self.sound_map = fetch_sounds()
-        if not self.sound_map:
+        sounds = self.sounds_manager.update_sounds()
+        if not sounds:
             return await interaction.response.send_message("No sounds available.")
         
-        sound_list = '\n'.join(self.sound_map)
+        sound_list = '\n'.join(sounds)
         await interaction.response.send_message(f"Available sounds:\n```\n{sound_list}\n```")
 
     @app_commands.command(name="play", description="Plays a sound in the voice channel")
     @app_commands.describe(sound_name="The name of the sound to play")
     async def play(self, interaction: Interaction, sound_name: str):
         if (sound_name is None):
-            return ctx.send("Provide a sound name to play. Use /ls to see available sounds.")
+            return await interaction.response.send_message("Provide a sound name to play. Use /ls to see available sounds.")
         
-        if (sound_name not in self.sound_map):
-            self.sound_map = fetch_sounds()
-            if (sound_name not in self.sound_map):
-                return await interaction.response.send_message(f"Sound '{sound_name}' not found.")        
+        sounds = self.sounds_manager.update_sounds()
+
+        if (sound_name not in sounds):
+            return await interaction.response.send_message(f"Sound '{sound_name}' not found.")        
         
         voice_client: VoiceClient = interaction.guild.voice_client
 
@@ -81,15 +82,14 @@ class SoundCommands(Cog):
         file_path = str(MP3_PATH / file_name)
         await attachment.save(fp=file_path)
 
-        self.sound_map = fetch_sounds()
-
         await interaction.response.send_message(f'Sound {file_name} uploaded successfully!')
 
 
     @app_commands.command(name="remove", description="Removes a sound")
     @app_commands.describe(sound_name="The name of the sound to remove")
-    async def remove(self, interaction: Interaction, sound_name: str):        
-        if sound_name not in self.sound_map:
+    async def remove(self, interaction: Interaction, sound_name: str): 
+        sounds = self.sounds_manager.update_sounds()       
+        if sound_name not in sounds:
             await interaction.response.send_message(f"Sound {sound_name} does not exist!")
             return
 
@@ -127,9 +127,5 @@ class SoundCommands(Cog):
         :return: A list of autocomplete choices
         :rtype: List[Choice[str]]
         """
-        return [
-            app_commands.Choice(name=sound, value=sound)
-            for sound in self.sound_map
-            if current.lower() in sound.lower()
-        ][:25]
+        return self.sounds_manager.sound_autocomplete(current)
     
