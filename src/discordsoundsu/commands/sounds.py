@@ -49,6 +49,10 @@ class SoundCommands(Cog):
 
         voice_client: VoiceClient = interaction.guild.voice_client
 
+        if voice_client and voice_client.is_playing():
+            voice_client.stop()
+            logger.info("Stopped currently playing sound")
+
         error = play_audio(sound_name, voice_client)
 
         if error:
