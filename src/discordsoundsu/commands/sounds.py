@@ -16,6 +16,7 @@ from discord import Interaction, app_commands, VoiceClient, Attachment
 
 from ..utils import MP3_PATH, play_audio
 from ..sounds_manager import SoundsManager
+from ..ui.sounds_card import SoundsCard
 
 logger = logging.getLogger(__name__)
 
@@ -28,13 +29,8 @@ class SoundCommands(Cog):
     @app_commands.command(name="ls", description="Lists available sounds")
     async def ls(self, interaction: Interaction):
         sounds = self.sounds_manager.update_sounds()
-        if not sounds:
-            return await interaction.response.send_message("No sounds available.")
 
-        sound_list = "\n".join(sounds)
-        await interaction.response.send_message(
-            f"Available sounds:\n```\n{sound_list}\n```"
-        )
+        await interaction.response.send_message(view=SoundsCard(sounds))
 
     @app_commands.command(name="play", description="Plays a sound in the voice channel")
     @app_commands.describe(sound_name="The name of the sound to play")
