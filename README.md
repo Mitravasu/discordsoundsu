@@ -90,6 +90,35 @@ uv run ruff format
 
 1. Reboot and discordsoundsu should run on startup
 
+## REST API
+
+### /docs
+
+-   swagger docs
+
+### POST /play/{sound_name}
+
+-   args
+    -   `sound_name` Name of the sound to play (without .mp3 extension)
+-   response
+    -   `status:str`
+    -   `message:str`
+-   `curl -X POST http://localhost:8000/play/okay`
+
+### GET /sounds
+
+-   response
+    -   `sounds:List[str]` list of sound names
+-   `curl http://localhost:8000/sounds`
+
+### GET /status
+
+-   response
+    -   `connected:str`
+    -   `voice_channel:str`
+    -   `guild:str`
+-   `curl http://localhost:8000/status`
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check the
