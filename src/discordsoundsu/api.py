@@ -68,6 +68,44 @@ class SoundsAPI:
                     "message": f"Playing sound: {sound_name}",
                 },
             )
+        
+        @self.app.post("/stop")
+        async def stop_sound():
+            """
+            Stop any currently playing sound.
+            """
+
+            # Get bot's voice client
+            voice_client = None
+            for vc in self.bot.voice_clients:
+                if vc.is_connected():
+                    voice_client = vc
+                    break
+
+            if not voice_client or not voice_client.is_connected():
+                raise HTTPException(
+                    status_code=503, detail="Bot is not connected to any voice channel"
+                )
+
+            if voice_client and voice_client.is_playing():
+                voice_client.stop()
+                logger.info("Stopped currently playing sound")
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",
+                        "message": "Stopped playing sound",
+                    },
+                )
+            else:
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",
+                        "message": "No sound was playing",
+                    },
+                )
+                
 
         @self.app.get("/sounds")
         async def list_sounds():
