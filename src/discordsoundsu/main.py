@@ -28,7 +28,13 @@ def run_api(client: DiscordSoundsUClient):
     """Run the REST API in a separate thread"""
     logger.info("Starting REST API server")
     api = SoundsAPI(client.bot, client.sounds_manager)
-    config = Config(app=api.app, host="0.0.0.0", port=8000, log_level="info")
+    config = Config(
+        app=api.app, 
+        host="0.0.0.0", 
+        port=8000, 
+        log_level="info",
+        timeout_keep_alive=30  # Keep connections alive for 30 seconds
+    )
     server = Server(config)
     asyncio.run(server.serve())
 
