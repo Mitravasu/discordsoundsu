@@ -21,6 +21,8 @@ channels.
 -   Python 3.11 only
 -   [uv](https://github.com/astral-sh/uv) package manager
 -   A Discord bot token
+-   FFMPEG
+-   `mp3` folder in the root directory
 
 ## 🚀 Installation
 
